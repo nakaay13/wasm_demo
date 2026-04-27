@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>WASM Snake</title>
+</head>
+<body>
+  <h1>🐍 WASM Snake</h1>
+  <p>Score: <span id="score">0</span></p>
+  <button onclick="restart()">Restart</button>
+
+  <canvas id="game" width="400" height="400" style="border:1px solid black;"></canvas>
+
+  <script type="module">
+    import init, { Game, Direction } from "./pkg/wasm_demo.js";
+
+    async function main() {
+      await init();
+
+      const canvas = document.getElementById("game");
+      const ctx = canvas.getContext("2d");
+
+      const gridSize = 20;
+      let game = new Game(20, 20);
+
+      window.restart = function () {
+        game.reset();
+      };
+
+      // Controls
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowUp") game.set_direction(Direction.Up);
+        if (e.key === "ArrowDown") game.set_direction(Direction.Down);
+        if (e.key === "ArrowLeft") game.set_direction(Direction.Left);
+        if (e.key === "ArrowRight") game.set_direction(Direction.Right);
+      });
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Snake
+        for (let i = 0; i < game.snake_length(); i++) {
+          ctx.fillStyle = i === 0 ? "green" : "black";
+          ctx.fillRect(
+            game.snake_x(i) * gridSize,
+            game.snake_y(i) * gridSize,
+            gridSize,
+            gridSize
+          );
+        }
+
+        // Food
+        ctx.fillStyle = "red";
+        ctx.fillRect(
+          game.food_x() * gridSize,
+          game.food_y() * gridSize,
+          gridSize,
+          gridSize
+        );
+
+        // Score
+        document.getElementById("score").innerText = game.score();
+
+        // Game Over text
+        if (game.is_game_over()) {
+          ctx.fillStyle = "black";
+          ctx.font = "30px Arial";
+          ctx.fillText("GAME OVER", 110, 200);
+        }
+      }
+
+      function loop() {
+        game.update(); // Rust logic
+        draw();        // JS rendering
+      }
+
+      setInterval(loop, 120);
+    }
+
+    main();
+  </script>
+</body>
+</html>
