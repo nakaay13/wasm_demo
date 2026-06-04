@@ -1,5 +1,5 @@
-mod snake;
-mod space;
+pub mod snake;
+pub mod flappy;
 
 pub use snake::*;
-pub use space::*;
+pub use flappy::*;
