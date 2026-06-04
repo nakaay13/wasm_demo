@@ -25,35 +25,56 @@ export async function startFlappy() {
     const ctx = canvas.getContext("2d");
 
     function draw() {
-        ctx.fillStyle = "#061620";
+    const scale = 20;
+
+    ctx.fillStyle = "#061620";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // bird
+    ctx.fillStyle = "#facc15";
+    ctx.fillRect(5 * scale, game.bird_y() * scale, scale, scale);
+
+    const gapSize = 8; // hole size in game units
+
+    // pipes
+    ctx.fillStyle = "#22c55e";
+
+    for (let i = 0; i < game.pipe_count(); i++) {
+        const x = game.pipe_x(i);
+        const gap = game.pipe_gap(i);
+
+        const topPipeHeight = (gap - gapSize / 2) * scale;
+        const bottomPipeY = (gap + gapSize / 2) * scale;
+
+        // TOP PIPE (stops before hole)
+        ctx.fillRect(
+            x * scale,
+            0,
+            scale,
+            Math.max(0, topPipeHeight)
+        );
+
+        // BOTTOM PIPE (starts after hole)
+        ctx.fillRect(
+            x * scale,
+            bottomPipeY,
+            scale,
+            canvas.height - bottomPipeY
+        );
+    }
+
+    document.getElementById("score").innerText = game.score();
+
+    if (game.is_game_over()) {
+        ctx.fillStyle = "rgba(0,0,0,0.6)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // bird
-        ctx.fillStyle = "#facc15";
-        ctx.fillRect(5 * 20, game.bird_y(), 20, 20);
-
-        // pipes
-        ctx.fillStyle = "#22c55e";
-        for (let i = 0; i < game.pipe_count(); i++) {
-            const x = game.pipe_x(i);
-            const gap = game.pipe_gap(i);
-
-            ctx.fillRect(x * 20, 0, 20, gap - 15);
-            ctx.fillRect(x * 20, gap + 15, 20, canvas.height);
-        }
-
-        document.getElementById("score").innerText = game.score();
-
-        if (game.is_game_over()) {
-            ctx.fillStyle = "rgba(0,0,0,0.6)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = "white";
-            ctx.font = "28px Arial";
-            ctx.textAlign = "center";
-            ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
-        }
+        ctx.fillStyle = "white";
+        ctx.font = "28px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
     }
+}
 
     function loop() {
         game.update();
