@@ -44,6 +44,7 @@ export function startPong() {
         ctx.fillStyle = "#061620";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+        // Center line
         ctx.strokeStyle = "rgba(255,255,255,0.25)";
         ctx.setLineDash([8, 8]);
         ctx.beginPath();
@@ -52,12 +53,15 @@ export function startPong() {
         ctx.stroke();
         ctx.setLineDash([]);
 
+        // Player paddle
         ctx.fillStyle = "#22c55e";
         ctx.fillRect(20, game.player_y() * scale, 14, game.paddle_height() * scale);
 
+        // Opponent paddle
         ctx.fillStyle = "#ef4444";
         ctx.fillRect(canvas.width - 34, game.computer_y() * scale, 14, game.paddle_height() * scale);
 
+        // Ball
         ctx.fillStyle = "white";
         ctx.beginPath();
         ctx.arc(game.ball_x() * scale, game.ball_y() * scale, 8, 0, Math.PI * 2);
