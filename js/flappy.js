@@ -1,5 +1,7 @@
 import init, { FlappyBird } from "../pkg/wasm_demo.js";
 
+const BEST_KEY = "best-flappy";
+
 let game;
 let timer;
 
@@ -20,6 +22,7 @@ export async function startFlappy() {
     await init();
 
     game = new FlappyBird(20, 20);
+    document.getElementById("best-score").innerText = localStorage.getItem(BEST_KEY) || "0";
 
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
@@ -63,7 +66,7 @@ export async function startFlappy() {
         );
     }
 
-    document.getElementById("score").innerText = game.score();
+    updateScores(game.score());
 
     if (game.is_game_over()) {
         ctx.fillStyle = "rgba(0,0,0,0.6)";
@@ -85,6 +88,14 @@ export async function startFlappy() {
 
     clearTimeout(timer);
     loop();
+}
+
+function updateScores(score) {
+    document.getElementById("score").innerText = score;
+
+    const best = Math.max(Number(localStorage.getItem(BEST_KEY) || "0"), score);
+    localStorage.setItem(BEST_KEY, best);
+    document.getElementById("best-score").innerText = best;
 }
 
 export function cleanupFlappy() {
