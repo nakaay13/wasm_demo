@@ -12,7 +12,7 @@ const gamePage = document.getElementById("game-page");
 await init();
 
 
-// 🎮 MENU EVENTS
+// MENU EVENTS
 document.getElementById("snake-card").addEventListener("click", () => {
     switchGame("snake");
 });
@@ -39,7 +39,7 @@ window.addEventListener("keydown", (e) => {
 });
 
 
-// 🎮 SWITCH GAME
+// SWITCH GAME
 function switchGame(game) {
     homePage.classList.add("hidden");
     gamePage.classList.remove("hidden");
@@ -59,7 +59,7 @@ function switchGame(game) {
 }
 
 
-// ▶ START GAME
+// START GAME
 function startGame(game) {
     if (game === "snake") startSnake();
     if (game === "pong") startPong();
@@ -73,7 +73,7 @@ function restartActiveGame() {
 }
 
 
-// 🏠 BACK TO MENU
+// BACK TO MENU
 function goHome() {
     cleanupSnake();
     cleanupPong();
