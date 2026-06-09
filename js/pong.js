@@ -1,4 +1,4 @@
-import { PongGame } from "../pkg";
+import { PongGame } from "../pkg/wasm_demo.js";
 
 const BEST_KEY = "best-pong";
 

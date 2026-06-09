@@ -27,10 +27,15 @@ document.getElementById("flappy-card").addEventListener("click", () => {
 
 document.getElementById("back-btn").addEventListener("click", goHome);
 
-document.getElementById("restart-btn").addEventListener("click", () => {
-    if (activeGame === "snake") startSnake();
-    if (activeGame === "pong") startPong();
-    if (activeGame === "flappy") startFlappy();
+document.getElementById("restart-btn").addEventListener("click", restartActiveGame);
+
+window.addEventListener("keydown", (e) => {
+    if (!activeGame || e.repeat) return;
+
+    if (e.key.toLowerCase() === "r") {
+        e.preventDefault();
+        restartActiveGame();
+    }
 });
 
 
@@ -41,7 +46,7 @@ function switchGame(game) {
 
     cleanupSnake();
     cleanupPong();
-    cleanupFlappy();
+    cleanupFlappy(); 
 
     activeGame = game;
 
@@ -59,6 +64,12 @@ function startGame(game) {
     if (game === "snake") startSnake();
     if (game === "pong") startPong();
     if (game === "flappy") startFlappy();
+}
+
+function restartActiveGame() {
+    if (activeGame === "snake") startSnake();
+    if (activeGame === "pong") startPong();
+    if (activeGame === "flappy") startFlappy();
 }
 
 
@@ -84,19 +95,19 @@ function updateGameText(game) {
 
     if (game === "snake") {
         title.innerText = "Snake";
-        hint.innerText = "Use arrow keys ↑ ↓ ← →";
+        hint.innerText = "Use arrow keys ↑ ↓ ← →. Press R to restart";
         bestScore.innerText = localStorage.getItem("best-snake") || "0";
     }
 
     if (game === "pong") {
         title.innerText = "Pong";
-        hint.innerText = "Use W/S or arrow keys ↑ ↓";
+        hint.innerText = "Use W/S or arrow keys ↑ ↓. Press R to restart";
         bestScore.innerText = localStorage.getItem("best-pong") || "0";
     }
 
     if (game === "flappy") {
         title.innerText = "Flappy Bird";
-        hint.innerText = "Press Spacebar to flap";
+        hint.innerText = "Press Spacebar to flap. Press R to restart";
         bestScore.innerText = localStorage.getItem("best-flappy") || "0";
     }
 }

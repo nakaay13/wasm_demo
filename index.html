@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WASM Arcade</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -15,27 +16,27 @@
 
     <div class="games">
 
-        <div class="card" id="snake-card">
+        <button class="card" id="snake-card" type="button">
             <h2>🐍 Snake</h2>
             <p>Play Snake</p>
-        </div>
+        </button>
 
-        <div class="card" id="pong-card">
+        <button class="card" id="pong-card" type="button">
             <h2>🏓 Pong</h2>
             <p>Play Pong</p>
-        </div>
+        </button>
 
-        <div class="card" id="flappy-card">
+        <button class="card" id="flappy-card" type="button">
             <h2>🐦 Flappy Bird</h2>
             <p>Play Flappy Bird</p>
-        </div>
+        </button>
     </div>
 
 </div>
 
 <div id="game-page" class="container hidden">
 
-    <button id="back-btn">← Back</button>
+    <button id="back-btn" type="button">← Back</button>
 
     <h1 id="game-title">Snake</h1>
 
@@ -50,8 +51,8 @@
             <span id="best-score">0</span>
         </div>
 
-        <button id="restart-btn">
-            Restart
+        <button id="restart-btn" type="button">
+            Restart (R)
         </button>
     </div>
 

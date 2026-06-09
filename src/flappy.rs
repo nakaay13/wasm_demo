@@ -1,22 +1,29 @@
 use wasm_bindgen::prelude::*;
 
+const BIRD_X: f32 = 5.0;
+const BIRD_SIZE: f32 = 0.9;
+const PIPE_WIDTH: f32 = 1.0;
+const GAP_SIZE: f32 = 7.0;
+const PIPE_SPEED: f32 = 0.066;
+const SPAWN_EVERY: u32 = 115;
+const GRAVITY: f32 = 0.033;
+const FLAP_STRENGTH: f32 = -0.50;
+const MIN_VELOCITY: f32 = -0.56;
+const MAX_VELOCITY: f32 = 0.64;
+
 #[wasm_bindgen]
 pub struct FlappyBird {
-    width: u32,
-    height: u32,
+    width: f32,
+    height: f32,
 
-    bird_y: i32,
-    velocity: i32,
+    bird_y: f32,
+    velocity: f32,
 
-    gravity: i32,
-    flap_strength: i32,
-
-    pipes: Vec<(u32, u32)>, // (x, gap_y center)
+    pipes: Vec<(f32, f32, bool)>, // (x, gap_y center, scored)
 
     tick: u32,
     score: u32,
     game_over: bool,
-
     start_delay: u32,
 }
 
@@ -25,59 +32,46 @@ impl FlappyBird {
     #[wasm_bindgen(constructor)]
     pub fn new(width: u32, height: u32) -> FlappyBird {
         Self {
-            width,
-            height,
-            bird_y: (height / 2) as i32,
-            velocity: 0,
-
-            gravity: 1,
-            flap_strength: -3,
-
-            pipes: vec![(width, height / 2)],
-
+            width: width as f32,
+            height: height as f32,
+            bird_y: height as f32 / 2.0,
+            velocity: 0.0,
+            pipes: vec![(width as f32, height as f32 / 2.0, false)],
             tick: 0,
             score: 0,
             game_over: false,
-
             start_delay: 20,
         }
     }
 
     pub fn flap(&mut self) {
         if !self.game_over {
-            self.velocity = self.flap_strength;
+            self.velocity = FLAP_STRENGTH;
         }
     }
 
     pub fn reset(&mut self) {
-        self.bird_y = (self.height / 2) as i32;
-        self.velocity = 0;
-
+        self.bird_y = self.height / 2.0;
+        self.velocity = 0.0;
         self.pipes.clear();
-        self.pipes.push((self.width, self.height / 2));
-
+        self.pipes.push((self.width, self.height / 2.0, false));
         self.score = 0;
         self.game_over = false;
         self.tick = 0;
-
         self.start_delay = 20;
     }
 
     fn spawn_pipe(&mut self) {
-        let gap_size = 8.min(self.height.saturating_sub(6));
-        let margin = 3;
+        let margin = 3.0;
+        let min = margin + GAP_SIZE / 2.0;
+        let max = self.height - margin - GAP_SIZE / 2.0;
+        let previous_gap = self.pipes.last().map(|pipe| pipe.1).unwrap_or(self.height / 2.0);
 
-        let min = margin + gap_size / 2;
-        let max = self.height.saturating_sub(margin + gap_size / 2);
-
-        let prev_gap = self.pipes.last().map(|p| p.1 as i32).unwrap_or((self.height / 2) as i32);
         let pseudo = self.tick.wrapping_mul(41).wrapping_add(17);
-        let drift = (pseudo % 9) as i32 - 4;
-        let mut gap_y = prev_gap + drift;
+        let drift = (pseudo % 900) as f32 / 100.0 - 4.5;
+        let gap_y = (previous_gap + drift).clamp(min, max);
 
-        gap_y = gap_y.clamp(min as i32, max as i32);
-
-        self.pipes.push((self.width, gap_y as u32));
+        self.pipes.push((self.width, gap_y, false));
     }
 
     pub fn update(&mut self) {
@@ -85,7 +79,6 @@ impl FlappyBird {
             return;
         }
 
-        // 🟡 start delay (prevents instant death)
         if self.start_delay > 0 {
             self.start_delay -= 1;
             return;
@@ -93,54 +86,51 @@ impl FlappyBird {
 
         self.tick += 1;
 
-        // physics
-        self.velocity += self.gravity;
-        self.velocity = self.velocity.clamp(-2, 2);
+        self.velocity = (self.velocity + GRAVITY).clamp(MIN_VELOCITY, MAX_VELOCITY);
         self.bird_y += self.velocity;
 
-        // ceiling / floor
-        if self.bird_y < 0 || self.bird_y >= self.height as i32 {
+        if self.bird_y < 0.0 || self.bird_y + BIRD_SIZE > self.height {
             self.game_over = true;
             return;
         }
 
-        // move pipes
         for pipe in &mut self.pipes {
-            pipe.0 = pipe.0.saturating_sub(1);
+            pipe.0 -= PIPE_SPEED;
         }
 
-        // spawn pipes
-        if self.tick % 20 == 0 {
+        if self.tick % SPAWN_EVERY == 0 {
             self.spawn_pipe();
         }
 
-        // remove off-screen pipes
-        self.pipes.retain(|p| p.0 > 0);
+        self.pipes.retain(|pipe| pipe.0 + PIPE_WIDTH > 0.0);
 
-        // collision + score
-        let bird_x = 5;
-        let gap_size = 8;
+        let bird_left = BIRD_X;
+        let bird_right = BIRD_X + BIRD_SIZE;
+        let bird_top = self.bird_y;
+        let bird_bottom = self.bird_y + BIRD_SIZE;
 
-        for pipe in &self.pipes {
-            let x = pipe.0 as i32;
-            let gap = pipe.1 as i32;
+        for pipe in &mut self.pipes {
+            let pipe_left = pipe.0;
+            let pipe_right = pipe.0 + PIPE_WIDTH;
+            let gap_top = pipe.1 - GAP_SIZE / 2.0;
+            let gap_bottom = pipe.1 + GAP_SIZE / 2.0;
 
-            // scoring (when passing pipe center)
-            if x == bird_x {
+            if !pipe.2 && pipe_right < bird_left {
                 self.score += 1;
+                pipe.2 = true;
             }
 
-            // collision zone
-            if x == bird_x {
-                if self.bird_y < gap - gap_size / 2 || self.bird_y > gap + gap_size / 2 {
-                    self.game_over = true;
-                    return;
-                }
+            let overlaps_x = bird_right > pipe_left && bird_left < pipe_right;
+            let outside_gap = bird_top < gap_top || bird_bottom > gap_bottom;
+
+            if overlaps_x && outside_gap {
+                self.game_over = true;
+                return;
             }
         }
     }
 
-    pub fn bird_y(&self) -> i32 {
+    pub fn bird_y(&self) -> f32 {
         self.bird_y
     }
 
@@ -148,11 +138,11 @@ impl FlappyBird {
         self.pipes.len()
     }
 
-    pub fn pipe_x(&self, i: usize) -> u32 {
+    pub fn pipe_x(&self, i: usize) -> f32 {
         self.pipes[i].0
     }
 
-    pub fn pipe_gap(&self, i: usize) -> u32 {
+    pub fn pipe_gap(&self, i: usize) -> f32 {
         self.pipes[i].1
     }
 
