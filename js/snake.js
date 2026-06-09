@@ -12,10 +12,27 @@ export function setupSnake() {
 function handleKeys(e) {
     if (!game) return;
 
-    if (e.key === "ArrowUp") game.set_direction(Direction.Up);
-    if (e.key === "ArrowDown") game.set_direction(Direction.Down);
-    if (e.key === "ArrowLeft") game.set_direction(Direction.Left);
-    if (e.key === "ArrowRight") game.set_direction(Direction.Right);
+    const key = e.key.toLowerCase();
+
+    if (key === "arrowup" || key === "w") {
+        e.preventDefault();
+        game.set_direction(Direction.Up);
+    }
+
+    if (key === "arrowdown" || key === "s") {
+        e.preventDefault();
+        game.set_direction(Direction.Down);
+    }
+
+    if (key === "arrowleft" || key === "a") {
+        e.preventDefault();
+        game.set_direction(Direction.Left);
+    }
+
+    if (key === "arrowright" || key === "d") {
+        e.preventDefault();
+        game.set_direction(Direction.Right);
+    }
 }
 
 export function startSnake() {

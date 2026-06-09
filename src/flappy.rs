@@ -1,15 +1,15 @@
 use wasm_bindgen::prelude::*;
 
 const BIRD_X: f32 = 5.0;
-const BIRD_SIZE: f32 = 0.9;
+const BIRD_SIZE: f32 = 0.8;
 const PIPE_WIDTH: f32 = 1.0;
-const GAP_SIZE: f32 = 7.0;
-const PIPE_SPEED: f32 = 0.066;
-const SPAWN_EVERY: u32 = 115;
-const GRAVITY: f32 = 0.033;
-const FLAP_STRENGTH: f32 = -0.50;
-const MIN_VELOCITY: f32 = -0.56;
-const MAX_VELOCITY: f32 = 0.64;
+const GAP_SIZE: f32 = 8.2;
+const PIPE_SPEED: f32 = 0.052;
+const SPAWN_EVERY: u32 = 140;
+const GRAVITY: f32 = 0.026;
+const FLAP_STRENGTH: f32 = -0.42;
+const MIN_VELOCITY: f32 = -0.50;
+const MAX_VELOCITY: f32 = 0.55;
 
 #[wasm_bindgen]
 pub struct FlappyBird {
@@ -24,7 +24,6 @@ pub struct FlappyBird {
     tick: u32,
     score: u32,
     game_over: bool,
-    start_delay: u32,
 }
 
 #[wasm_bindgen]
@@ -40,7 +39,6 @@ impl FlappyBird {
             tick: 0,
             score: 0,
             game_over: false,
-            start_delay: 20,
         }
     }
 
@@ -58,7 +56,6 @@ impl FlappyBird {
         self.score = 0;
         self.game_over = false;
         self.tick = 0;
-        self.start_delay = 20;
     }
 
     fn spawn_pipe(&mut self) {
@@ -68,7 +65,7 @@ impl FlappyBird {
         let previous_gap = self.pipes.last().map(|pipe| pipe.1).unwrap_or(self.height / 2.0);
 
         let pseudo = self.tick.wrapping_mul(41).wrapping_add(17);
-        let drift = (pseudo % 900) as f32 / 100.0 - 4.5;
+        let drift = (pseudo % 640) as f32 / 100.0 - 3.2;
         let gap_y = (previous_gap + drift).clamp(min, max);
 
         self.pipes.push((self.width, gap_y, false));
@@ -76,11 +73,6 @@ impl FlappyBird {
 
     pub fn update(&mut self) {
         if self.game_over {
-            return;
-        }
-
-        if self.start_delay > 0 {
-            self.start_delay -= 1;
             return;
         }
 

@@ -24,6 +24,11 @@ button {
     font-weight: 700;
 }
 
+button:disabled {
+    opacity: .5;
+    cursor: default;
+}
+
 .container {
     width: min(100%, 720px);
     text-align: center;

@@ -65,7 +65,7 @@ export function startFlappy() {
 }
 
 function drawPipes(ctx, canvas, scale) {
-    const gapSize = 7;
+    const gapSize = 8.2;
 
     ctx.fillStyle = "#22c55e";
 

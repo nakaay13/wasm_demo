@@ -4,6 +4,7 @@ const BEST_KEY = "best-pong";
 
 let game;
 let timer;
+const heldMovementKeys = [];
 
 export function setupPong() {
     window.addEventListener("keydown", handleKeyDown);
@@ -13,27 +14,60 @@ export function setupPong() {
 function handleKeyDown(e) {
     if (!game) return;
 
-    if (e.key === "ArrowUp" || e.key === "w") {
+    const movement = movementForKey(e.key);
+    if (movement) {
         e.preventDefault();
-        game.set_player_direction(-1);
-    }
-
-    if (e.key === "ArrowDown" || e.key === "s") {
-        e.preventDefault();
-        game.set_player_direction(1);
+        rememberMovementKey(movement.key, movement.direction);
+        updatePlayerDirection();
     }
 }
 
 function handleKeyUp(e) {
     if (!game) return;
 
-    if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "w" || e.key === "s") {
+    const movement = movementForKey(e.key);
+    if (movement) {
         e.preventDefault();
-        game.set_player_direction(0);
+        forgetMovementKey(movement.key);
+        updatePlayerDirection();
     }
 }
 
+function movementForKey(key) {
+    const normalized = key.toLowerCase();
+
+    if (normalized === "arrowup" || normalized === "w") {
+        return { key: normalized, direction: -1 };
+    }
+
+    if (normalized === "arrowdown" || normalized === "s") {
+        return { key: normalized, direction: 1 };
+    }
+
+    return null;
+}
+
+function rememberMovementKey(key, direction) {
+    forgetMovementKey(key);
+    heldMovementKeys.push({ key, direction });
+}
+
+function forgetMovementKey(key) {
+    const index = heldMovementKeys.findIndex((movement) => movement.key === key);
+    if (index !== -1) heldMovementKeys.splice(index, 1);
+}
+
+function updatePlayerDirection() {
+    const movement = heldMovementKeys[heldMovementKeys.length - 1];
+    game.set_player_direction(movement ? movement.direction : 0);
+}
+
+function resetHeldMovementKeys() {
+    heldMovementKeys.length = 0;
+}
+
 export function startPong() {
+    resetHeldMovementKeys();
     game = new PongGame(20, 20);
 
     const canvas = document.getElementById("game");
@@ -73,10 +107,12 @@ export function startPong() {
             ctx.fillStyle = "rgba(0,0,0,0.6)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+            const result = game.score() > game.opponent_score() ? "YOU WON" : "YOU LOST";
+
             ctx.fillStyle = "white";
             ctx.font = "28px Arial";
             ctx.textAlign = "center";
-            ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
+            ctx.fillText(result, canvas.width / 2, canvas.height / 2);
         }
     }
 
@@ -105,5 +141,6 @@ export function cleanupPong() {
     clearTimeout(timer);
     window.removeEventListener("keydown", handleKeyDown);
     window.removeEventListener("keyup", handleKeyUp);
+    resetHeldMovementKeys();
     game = null;
 }

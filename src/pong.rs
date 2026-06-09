@@ -77,14 +77,8 @@ impl PongGame {
         }
 
         if self.ball_x <= 2.0 && self.ball_vx < 0.0 && Self::hits_paddle(self.player_y, self.ball_y) {
-            self.player_score += 1;
             self.ball_vx = 0.34;
             self.ball_vy += (self.ball_y - (self.player_y + PADDLE_HEIGHT / 2.0)) * 0.06;
-
-            if self.player_score >= WINNING_SCORE {
-                self.game_over = true;
-                return;
-            }
         }
 
         if self.ball_x >= self.width - 3.0 && self.ball_vx > 0.0 && Self::hits_paddle(self.ai_y, self.ball_y) {
@@ -100,6 +94,7 @@ impl PongGame {
         }
 
         if self.ball_x > self.width {
+            self.player_score += 1;
             self.after_point(-1.0);
         }
     }
