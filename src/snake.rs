@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 
-// Directions
+// Possible movement directions for the snake
 #[wasm_bindgen]
 #[derive(Clone, Copy)]
 pub enum Direction {
@@ -12,12 +12,20 @@ pub enum Direction {
 
 #[wasm_bindgen]
 pub struct SnakeGame {
+    // Size of the game board
     width: u32,
     height: u32,
+
+    // First element is always the snake head
     snake: Vec<(u32, u32)>,
+
+    // Current direction and next requested direction
     dir: Direction,
     next_dir: Direction,
+
+    // Food position
     food: (u32, u32),
+
     game_over: bool,
     score: u32,
 }
@@ -29,16 +37,23 @@ impl SnakeGame {
         SnakeGame {
             width,
             height,
+
+            // Snake starts with one segment
             snake: vec![(5, 5)],
+
             dir: Direction::Right,
             next_dir: Direction::Right,
+
+            // Initial food position
             food: (10, 10),
+
             game_over: false,
             score: 0,
         }
     }
 
     pub fn reset(&mut self) {
+        // Return game to starting state
         self.snake = vec![(5, 5)];
         self.dir = Direction::Right;
         self.next_dir = Direction::Right;
@@ -48,12 +63,14 @@ impl SnakeGame {
     }
 
     pub fn set_direction(&mut self, dir: Direction) {
+        // Prevent instant 180 degree turns
         if !Self::is_opposite(self.dir, dir) {
             self.next_dir = dir;
         }
     }
 
     fn is_opposite(current: Direction, next: Direction) -> bool {
+        // Returns true if player tries to move directly backwards
         matches!(
             (current, next),
             (Direction::Up, Direction::Down)
@@ -64,49 +81,60 @@ impl SnakeGame {
     }
 
     pub fn update(&mut self) {
+        // Stop updating when game is over
         if self.game_over {
             return;
         }
 
+        // Apply the player's latest direction
         self.dir = self.next_dir;
 
+        // Current head position
         let (head_x, head_y) = self.snake[0];
 
+        // Calculate where the new head should move
         let new_head = match self.dir {
             Direction::Up => (head_x, head_y.wrapping_sub(1)),
-            Direction::Down => (head_x + 0, head_y + 1),
+            Direction::Down => (head_x, head_y + 1),
             Direction::Left => (head_x.wrapping_sub(1), head_y),
             Direction::Right => (head_x + 1, head_y),
         };
 
-        // Wall collision
+        // Snake dies if it hits a wall
         if new_head.0 >= self.width || new_head.1 >= self.height {
             self.game_over = true;
             return;
         }
 
-        // Self collision
+        // Snake dies if it runs into itself
         if self.snake.contains(&new_head) {
             self.game_over = true;
             return;
         }
 
+        // Add new head at the front of the snake
         self.snake.insert(0, new_head);
 
-        // Food eaten
+        // Check if food was eaten
         if new_head == self.food {
             self.score += 1;
 
-            // Simple pseudo-random spawn
+            // Generate a new food position
+            // Not truly random, but good enough for this game
             let x = (new_head.0 + self.score * 3) % self.width;
             let y = (new_head.1 + self.score * 7) % self.height;
+
             self.food = (x, y);
+
+            // Tail is NOT removed, making the snake grow
         } else {
+            // Remove last segment to keep same length
             self.snake.pop();
         }
     }
 
-    // Getters
+    // Getter functions used by JavaScript
+
     pub fn snake_length(&self) -> usize {
         self.snake.len()
     }
