@@ -1,4 +1,5 @@
 use wasm_bindgen::prelude::*;
+use js_sys::Math;
 
 const BIRD_X: f32 = 5.0;
 const BIRD_SIZE: f32 = 0.8;
@@ -58,18 +59,16 @@ impl FlappyBird {
         self.tick = 0;
     }
 
-    fn spawn_pipe(&mut self) {
-        let margin = 3.0;
-        let min = margin + GAP_SIZE / 2.0;
-        let max = self.height - margin - GAP_SIZE / 2.0;
-        let previous_gap = self.pipes.last().map(|pipe| pipe.1).unwrap_or(self.height / 2.0);
 
-        let pseudo = self.tick.wrapping_mul(41).wrapping_add(17);
-        let drift = (pseudo % 640) as f32 / 100.0 - 3.2;
-        let gap_y = (previous_gap + drift).clamp(min, max);
+fn spawn_pipe(&mut self) {
+    let margin = 3.0;
+    let min = margin + GAP_SIZE / 2.0;
+    let max = self.height - margin - GAP_SIZE / 2.0;
 
-        self.pipes.push((self.width, gap_y, false));
-    }
+    let gap_y = min + (Math::random() as f32) * (max - min);
+
+    self.pipes.push((self.width, gap_y, false));
+}
 
     pub fn update(&mut self) {
         if self.game_over {
