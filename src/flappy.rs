@@ -6,10 +6,10 @@ const PIPE_WIDTH: f32 = 1.0;
 const GAP_SIZE: f32 = 8.2;
 const PIPE_SPEED: f32 = 0.052;
 const SPAWN_EVERY: u32 = 140;
-const GRAVITY: f32 = 0.026;
-const FLAP_STRENGTH: f32 = -0.42;
-const MIN_VELOCITY: f32 = -0.50;
-const MAX_VELOCITY: f32 = 0.55;
+const GRAVITY: f32 = 0.005;
+const FLAP_STRENGTH: f32 = -0.20;
+const MAX_VELOCITY: f32 = 0.22;
+const MIN_VELOCITY: f32 = -0.30;
 
 #[wasm_bindgen]
 pub struct FlappyBird {
