@@ -102,27 +102,20 @@ impl FlappyBird {
     }
 
     pub fn update(&mut self) {
-        // Do nothing if the game is already over
         if self.game_over {
             return;
         }
-
-        // Count frames
         self.tick += 1;
 
-        // Add gravity to velocity and limit the speed
         self.velocity = (self.velocity + GRAVITY).clamp(MIN_VELOCITY, MAX_VELOCITY);
 
-        // Move bird based on velocity
         self.bird_y += self.velocity;
 
-        // Bird dies if it hits top or bottom of screen
         if self.bird_y < 0.0 || self.bird_y + BIRD_SIZE > self.height {
             self.game_over = true;
             return;
         }
 
-        // Move all pipes to the left
         for pipe in &mut self.pipes {
             pipe.0 -= PIPE_SPEED;
         }
