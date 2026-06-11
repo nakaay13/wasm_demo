@@ -111,7 +111,6 @@ function drawPipes(ctx, canvas, scale) {
         ctx.fillRect(x * scale, 0, scale, Math.max(0, topPipeHeight));
         ctx.fillRect(x * scale, bottomPipeY, scale, canvas.height - bottomPipeY);
 
-        // Decorative pipe caps
         ctx.fillStyle = "#86efac";
         ctx.fillRect(x * scale - 3, Math.max(0, topPipeHeight - 8), scale + 6, 8);
         ctx.fillRect(x * scale - 3, bottomPipeY, scale + 6, 8);
